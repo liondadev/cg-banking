@@ -8,3 +8,13 @@ CREATE TABLE IF NOT EXISTS cgbanking_balances (
     steam_id VARCHAR(32) PRIMARY KEY,
     balance DECIMAL(14, 2) NOT NULL DEFAULT 0
 );
+
+-- Get the account balance of a user
+SELECT * FROM cgbanking_balances
+WHERE steam_id = ?
+LIMIT 1;
+
+-- update a player's balance
+UPDATE cgbanking_balances
+SET balance = ?
+WHERE steam_id = ?;

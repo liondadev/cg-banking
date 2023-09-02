@@ -16,11 +16,13 @@ local function tp(t)
     return table_prefix .. t
 end
 
-CGBanking.DB = mysqloo.connect(creds.hostname, creds.username, creds.password, creds.database, creds.port)
+local tblName = tp("balances")
+
+CGBanking.DB = CGBanking.DB or mysqloo.connect(creds.hostname, creds.username, creds.password, creds.database, creds.port)
 
 -- q will perform a query, and log the error if there was one
 local function q(queryStr)
-    query = CGBanking.DB:query(queryStr)
+    local query = CGBanking.DB:query(queryStr)
     query:start()
     query:wait()
     err = query:error()
@@ -38,7 +40,7 @@ function CGBanking.InitDatabase()
         CGBanking.DB:connect()
     end
 
-    q([[CREATE TABLE IF NOT EXISTS ]] .. tp("balances") .. [[ (
+    q([[CREATE TABLE IF NOT EXISTS ]] .. tblName .. [[ (
         steam_id VARCHAR(32) PRIMARY KEY,
         balance DECIMAL(14, 2) NOT NULL DEFAULT 0
     );]])
@@ -47,17 +49,46 @@ end
 -- CGBanking.PreSetupSteamID is called when the player joins the server, and needs to have their banking stuff setup
 -- this can be used for creating tables, or maybe nothing
 function CGBanking.PreSetupSteamID(sid)
-    print("setting up " .. sid)
+    local bal = CGBanking.GetAccountBalance(sid)
+    if bal == -1 then
+        q([[
+            INSERT INTO ]] .. tblName .. [[ (steam_id, balance)
+            VALUES ("]] .. sid .. "\"," .. CGBanking.Config.StartingBankAccountBalance .. ");")
+    end
 end
 
 -- CGBanking.GetAccountBalance(sid: string): int will get the account balance of a user
 -- this will return nil if the user wasn't found or something else bad happened.
 function CGBanking.GetAccountBalance(sid)
+    local query = [[SELECT * FROM ]] .. tblName .. [[
+        WHERE steam_id = "]] .. CGBanking.DB:escape(sid) ..  [["
+        LIMIT 1;]]
 
+    local data = q(query)
+    if data == nil or not istable(data) then
+        return -1
+    end
+
+    local row = data[1]
+    if row == nil or not istable(row) then
+        CGBanking.Print("Failed to get row data ", row)
+        return -1
+    end
+    return row.balance or 0
 end
 
 -- CGBanking.SetAccountBalance(sid: string, amt: int): string? will set the balance of an account
--- this will also check if the action was successful, and will return a string if something went wrong as an error message
+-- this will also check if the action was successful
 function CGBanking.SetAccountBalance(sid, amt)
+    sid = CGBanking.DB:escape(sid)
+    local query = [[UPDATE ]] .. tblName .. [[
+        SET balance = ]] .. CGBanking.DB:escape(amt) .. [[
+        WHERE steam_id = "]] .. sid .. "\";"
+    q(query)
 
+    CGBanking.SendPlayerBalance(player.GetAll(), sid)
+end
+
+for _, ply in pairs(player.GetAll()) do
+    CGBanking.SetAccountBalance(ply:SteamID64(), 800)
 end
