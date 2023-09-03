@@ -6,6 +6,7 @@ util.AddNetworkString("CGBanking.RequestPlayerBalance")
 util.AddNetworkString("CGBanking.SendBalance")
 util.AddNetworkString("CGBanking.Deposit")
 util.AddNetworkString("CGBanking.Withdraw")
+util.AddNetworkString("CGBanking.OpenMenu")
 
 -- CGBanking.SendPlayerBalance(target: Player, sid: string) sends the balance of the user with the steamid to the user
 function CGBanking.SendPlayerBalance(target, sid)
@@ -15,6 +16,12 @@ function CGBanking.SendPlayerBalance(target, sid)
         net.WriteString(sid)
         net.WriteFloat(balance)
     net.Send(target)
+end
+
+-- CGBanking.ForceOpenMenu(ply: Player) will open the ATM menu on a client's screen
+function CGBanking.ForceOpenMenu(ply)
+    net.Start("CGBanking.OpenMenu")
+    net.Send(ply)
 end
 
 hook.Add("PlayerInitialSpawn", "CGBanking.SetupPlayerData", function(ply)

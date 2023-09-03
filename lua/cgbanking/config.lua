@@ -13,12 +13,16 @@ CGBanking.Config.CommunityColor = Color(255, 75, 75)
 CGBanking.Config.MaxMoney = 999999999
 
 -- time in seconds between interest payments
-CGBanking.Config.InterestTimer = 5
+CGBanking.Config.InterestTimer = 500
 -- The interest any person will get
 -- 0.25 = 25%
 -- 1 = 100%
 CGBanking.Config.Interest = 0.001
 CGBanking.Config.MaxInterest = 5000 -- The max amount of money someone can get from one interest payment, -1 will mean this is ignored!
+
+-- Allow people to use the banking commands to access the ATM anywhere?
+CGBanking.Config.ATMCommand = true
+CGBanking.Config.ATMCommands = {"/banking", "!banking"} -- the commands to open the menu
 
 -- Language and translation strings throughout the addon
 CGBanking.Lang = {
@@ -34,10 +38,13 @@ CGBanking.Lang = {
     ["balance_loading"] = "Balance: Loading...",
     ["new_balance_waiting"] = "New Balance: waiting for input",
     ["new_balance_money"] = "New Balance: {AMT}",
-    ["submit"] = "Submit"
+    ["submit"] = "Submit",
+    ["atm"] = "ATM",
 }
 
 CGBanking.Theme = {
     FrameBackground = Color(0, 0, 0, 200),
-    Text = Color(255, 255, 255)
+    Text = Color(255, 255, 255),
+    AtmBackground = Color(0, 0, 0, 200),
+    AtmText = Color(255, 255, 255),
 }
