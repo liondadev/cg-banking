@@ -40,7 +40,6 @@ if CLIENT then
 
     function ENT:Draw()
         self:DrawModel()
-
         if self:GetPos():Distance(LocalPlayer():GetPos()) >= 500 then return end
 
         surface.SetFont("CGBanking.OverEnt")
